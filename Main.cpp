@@ -70,6 +70,22 @@ int main() {
 
 	GLuint VBO, VAO, EBO, shaderProgram;
 
+	// Gen buffers and vertex array
+
+	glGenBuffers(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	// Get fragment and vertex shaders code 
 	std::string vertexCode = get_file_contents("mandelbrot.vert");
 	std::string fragmentCode = get_file_contents("mandelbrot.frag");
@@ -104,11 +120,20 @@ int main() {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	
+
 	while (!glfwWindowShouldClose(window))
 	{
 		// Handling events
 		glfwPollEvents();
 	}
+
+	// Delete VAO, EBO, VBO and shader program
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteProgram(shaderProgram);
 	
 	glfwDestroyWindow(window);
 	glfwTerminate();
