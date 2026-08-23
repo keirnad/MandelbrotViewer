@@ -7,6 +7,28 @@
 #include <cerrno>
 
 
+void compileErrors(unsigned int shader, const char* type)
+{
+	GLint hasCompiled;
+	char infolog[1024];
+	if (type != "PROGRAM")
+	{
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &hasCompiled);
+		if (hasCompiled == GL_FALSE) {
+			glGetShaderInfoLog(shader, 1024, NULL, infolog);
+			std::cout << "SHADER_COMPILATION_ERROR for:" << type << "\n" << std::endl;
+		}
+	}
+	else
+	{
+		glGetProgramiv(shader, GL_COMPILE_STATUS, &hasCompiled);
+		if (hasCompiled == GL_FALSE) {
+			glGetProgramInfoLog(shader, 1024, NULL, infolog);
+			std::cout << "SHADER_LINKING_ERROR for:" << type << "\n" << std::endl;
+		}
+	}
+}
+
 // Function for reading file contents (use it for shaders) https://insanecoding.blogspot.com/2011/11/how-to-read-in-file-in-c.html
 std::string get_file_contents(const char* filename)
 {
@@ -68,23 +90,7 @@ int main() {
 
 	glViewport(0, 0, 800, 800);
 
-	GLuint VBO, VAO, EBO, shaderProgram;
-
-	// Gen buffers and vertex array
-
-	glGenBuffers(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	GLuint VBO, VAO, EBO;
 
 	// Get fragment and vertex shaders code 
 	std::string vertexCode = get_file_contents("mandelbrot.vert");
@@ -99,31 +105,54 @@ int main() {
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexSource, NULL);
 	glCompileShader(vertexShader);
+	compileErrors(vertexShader, "VERTEX");
 
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
 	glCompileShader(fragmentShader);
+	compileErrors(vertexShader, "FRAGMENT");
 
-	// Creating shader program
-
-	shaderProgram = glCreateProgram();
-
-	// Attaching my shaders to program and link my program
+	GLuint shaderProgram = glCreateProgram();
 
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 
 	glLinkProgram(shaderProgram);
+	compileErrors(vertexShader, "PROGRAM");
 
 	// Delete shaders because we dont need them anymore
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	// Gen buffers and vertex array
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	
 
 	while (!glfwWindowShouldClose(window))
 	{
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glfwSwapBuffers(window);
 		// Handling events
 		glfwPollEvents();
 	}
