@@ -68,7 +68,7 @@ int main() {
 
 	glViewport(0, 0, 800, 800);
 
-	GLuint VBO, VAO, EBO;
+	GLuint VBO, VAO, EBO, shaderProgram;
 
 	// Get fragment and vertex shaders code 
 	std::string vertexCode = get_file_contents("mandelbrot.vert");
@@ -87,6 +87,22 @@ int main() {
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
 	glCompileShader(fragmentShader);
+
+	// Creating shader program
+
+	shaderProgram = glCreateProgram();
+
+	// Attaching my shaders to program and link my program
+
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+
+	glLinkProgram(shaderProgram);
+
+	// Delete shaders because we dont need them anymore
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
 	while (!glfwWindowShouldClose(window))
 	{
