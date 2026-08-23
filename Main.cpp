@@ -12,6 +12,20 @@ int main() {
 	// Use only modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	GLfloat vertices[] =
+	{
+		-1.0, 1.0, 0.0,
+		1.0, 1.0, 0.0,
+		-1.0, -1.0, 0.0,
+		1.0, -1.0, 0.0
+	};
+
+	GLuint indices[] =
+	{
+		0, 1, 2,
+		2, 1, 3
+	};
+
 	// Creating window and handling error
 	GLFWwindow* window = glfwCreateWindow(800, 800, "MandelbrotViewer", NULL, NULL);
 	if (window == NULL)
