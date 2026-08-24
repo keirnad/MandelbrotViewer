@@ -14,7 +14,7 @@ float IterateMandelbrot()
     float iterations = 0.0;
     vec2 z  = vec2(0.0);
 
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < 512; i++)
     {
         float tmp_real = real;
         real = (real * real - imag * imag) + const_real;
@@ -22,11 +22,13 @@ float IterateMandelbrot()
          
         vec2 z = vec2(real, imag);
          
-        if (dot(z,z) > 4.0)
+        if (dot(z,z) > (256 * 256))
         break;
 
         iterations += 1.0;
     }
+
+    if( iterations>511.0 ) return 0.0;
 
     float sn = iterations - log2(log2(dot(z,z))) + 4.0;
     return sn;
@@ -39,10 +41,11 @@ vec4 return_color()
 
     if (iter > 0.0) 
     {
-        col += 0.5+0.5*cos(0.2*(iter * 0.5)+vec3(2.7,3.2,3.7));
+        col += 0.5+0.5*cos(0.2*iter+vec3(2.7,3.2,3.7));
     }
 
     return vec4(col, 1.0f );
+
 }
  
 void main()
