@@ -22,7 +22,7 @@ float IterateMandelbrot()
     {
         float tmp_real = real;
         real = (real * real - imag * imag) + const_real;
-        imag = (2.0 * real * imag) + const_imag;
+        imag = (2.0 * tmp_real * imag) + const_imag;
          
         z = vec2(real, imag);
          
