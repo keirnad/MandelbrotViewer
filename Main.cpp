@@ -6,6 +6,10 @@
 #include <sstream>
 #include <cerrno>
 
+GLuint scale_mandelbrot, x_offset, y_offset;
+float scale = 5.0f;
+float x_offset_val = 0.6f;
+float y_offset_val = 0.5f;
 
 void compileErrors(unsigned int shader, const char* type)
 {
@@ -44,6 +48,21 @@ std::string get_file_contents(const char* filename)
 		return(contents);
 	}
 	throw(errno);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (yoffset > 0) 
+	{
+		scale -= 0.1f;
+		glUniform1f(scale_mandelbrot, scale);
+
+	}
+	else 
+	{
+		scale += 0.1f;
+		glUniform1f(scale_mandelbrot, scale);
+	}
 }
 
 int main() {
@@ -146,10 +165,15 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	
+	scale_mandelbrot = glGetUniformLocation(shaderProgram, "scale");
+	x_offset = glGetUniformLocation(shaderProgram, "x_offset");
+	y_offset = glGetUniformLocation(shaderProgram, "y_offset");
 
 	while (!glfwWindowShouldClose(window))
 	{
+		
 		glUseProgram(shaderProgram);
+		glfwSetScrollCallback(window, scroll_callback);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window);
