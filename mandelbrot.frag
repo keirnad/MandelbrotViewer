@@ -21,10 +21,10 @@ float IterateMandelbrot()
     for (int i = 0; i < 512; i++)
     {
         float tmp_real = real;
-        real = (real * real - imag * imag);
-        imag = (2.0 * real * imag);
+        real = (real * real - imag * imag) + const_real;
+        imag = (2.0 * real * imag) + const_imag;
          
-        z = vec2(real, imag) + vec2(const_real, const_imag);
+        z = vec2(real, imag);
          
         if (dot(z,z) > (256 * 256))
         break;
