@@ -2,11 +2,15 @@
 in vec4 gl_FragCoord;
  
 out vec4 frag_color;
+
+uniform float scale = 5.0;
+uniform float x_offset = 0.5;
+uniform float y_offset = 0.5;
  
 float IterateMandelbrot()
 {
-    float real = (gl_FragCoord.x / 800.0 - 0.6) * 4.0;
-    float imag = (gl_FragCoord.y / 800.0 - 0.5) * 4.0;
+    float real = ((gl_FragCoord.x / 800.0 - x_offset) * scale);
+    float imag = ((gl_FragCoord.y / 800.0 - y_offset) * scale);
  
     float const_real = real;
     float const_imag = imag;
@@ -17,10 +21,10 @@ float IterateMandelbrot()
     for (int i = 0; i < 512; i++)
     {
         float tmp_real = real;
-        real = (real * real - imag * imag) + const_real;
-        imag = (2.0 * tmp_real * imag) + const_imag;
+        real = (real * real - imag * imag);
+        imag = (2.0 * real * imag);
          
-        vec2 z = vec2(real, imag);
+        z = vec2(real, imag) + vec2(const_real, const_imag);
          
         if (dot(z,z) > (256 * 256))
         break;
@@ -31,7 +35,8 @@ float IterateMandelbrot()
     if( iterations>511.0 ) return 0.0;
 
     float sn = iterations - log2(log2(dot(z,z))) + 4.0;
-    return sn;
+    float al = smoothstep(-0.1, 0.0, sin(3.1415927));
+    return mix(iterations, sn, al);
 }
  
 vec4 return_color()
