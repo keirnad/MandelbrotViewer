@@ -1,35 +1,31 @@
 #version 460 core
-in vec4 gl_FragCoord;
- 
 out vec4 frag_color;
 
-uniform float scale = 5.0;
-uniform float x_offset = 0.5;
-uniform float y_offset = 0.5;
+uniform float scale = 1.0;
+uniform vec2 center = vec2(0.1, 0.7);
+
+in vec4 TexCoord;
  
 float IterateMandelbrot()
 {
-    float real = ((gl_FragCoord.x / 800.0 - x_offset) * scale);
-    float imag = ((gl_FragCoord.y / 800.0 - y_offset) * scale);
+    vec2 floatPosition = vec2(TexCoord.x, TexCoord.y);
  
-    float const_real = real;
-    float const_imag = imag;
-
     float iterations = 0.0;
-    vec2 z  = vec2(0.0);
 
-    for (int i = 0; i < 512; i++)
-    {
-        float tmp_real = real;
-        real = (real * real - imag * imag) + const_real;
-        imag = (2.0 * tmp_real * imag) + const_imag;
+    vec2 z;
+    vec2 result = vec2(0.0);
+    vec2 c = vec2((floatPosition.x * 2.0 * scale) + (center.x), (floatPosition.y * 2.0 * scale) + (center.y));
+    z = c;
+
+    for (int i = 0; i < 256; i++)
+    {         
+        result = vec2((z.x * z.x) - (z.y * z.y), (2 * z.x * z.y)) + c;
          
-        z = vec2(real, imag);
-         
-        if (dot(z,z) > (256 * 256))
+        if (dot(result, result) > (256 * 256))
         break;
 
         iterations += 1.0;
+        z = result;
     }
 
     if( iterations>511.0 ) return 0.0;
