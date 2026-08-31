@@ -12,7 +12,32 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-GLuint scale_mandelbrot, x_offset, y_offset;
+GLuint x_offset, y_offset, mandelbrot_scale;
+
+float x_offset_val = 4.0F;
+
+float y_offset_val = 5.0f;
+
+float scale = 2.0f;
+
+int iterations = 250;
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS))
+		x_offset_val += scale * 0.025f;
+	if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS))
+		x_offset_val -= scale * 0.025f;
+	if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS))
+		y_offset_val += scale * 0.025f;
+	if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS))
+		y_offset_val -= scale * 0.025f;
+
+	if (key == GLFW_KEY_EQUAL && (action == GLFW_REPEAT || action == GLFW_PRESS))
+		scale -= scale * 0.025f;
+	if (key == GLFW_KEY_MINUS && (action == GLFW_REPEAT || action == GLFW_PRESS))
+		scale += scale * 0.025f;
+}
 
 void compileErrors(unsigned int shader, const char* type)
 {
@@ -167,12 +192,30 @@ int main() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		glfwSetKeyCallback(window, key_callback);
+
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-		ImGui::Begin("Example window");
-		ImGui::Text("Hello Mandelbrot!");
+		glUniform1f(glGetUniformLocation(shaderProgram, "x_offset"), x_offset_val);
+		glUniform1f(glGetUniformLocation(shaderProgram, "y_offset"), y_offset_val);
+		glUniform1f(glGetUniformLocation(shaderProgram, "iterations"), iterations);
+		glUniform1f(glGetUniformLocation(shaderProgram, "scale"), scale);
+
+		ImGui::Begin("Settings");
+		ImGui::SliderInt("Iterations", &iterations, 10, 1000);
+		ImGui::End();
+
+		ImGui::Begin("Controls");
+		ImGui::Text("Movements:");
+		ImGui::Text("Move Up: W");
+		ImGui::Text("Move Down: S");
+		ImGui::Text("Move Left: A");
+		ImGui::Text("Move Right: D\n\n");
+		ImGui::Text("Scaling:");
+		ImGui::Text("Zoom: +");
+		ImGui::Text("Zoom Out: -");
 		ImGui::End();
 
 		ImGui::Render();
