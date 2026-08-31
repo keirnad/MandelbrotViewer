@@ -14,29 +14,31 @@
 
 GLuint x_offset, y_offset, mandelbrot_scale;
 
-float x_offset_val = 4.0F;
+float x_offset_val = -0.5f;
 
-float y_offset_val = 5.0f;
+float y_offset_val = 0.0f;
 
 float scale = 2.0f;
 
 int iterations = 250;
 
+float color_multiple = 1.0f;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS))
-		x_offset_val += scale * 0.025f;
+		x_offset_val += scale * 0.025;
 	if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS))
-		x_offset_val -= scale * 0.025f;
+		x_offset_val -= scale * 0.025;
 	if (key == GLFW_KEY_W && (action == GLFW_REPEAT || action == GLFW_PRESS))
-		y_offset_val += scale * 0.025f;
+		y_offset_val += scale * 0.025;
 	if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS))
-		y_offset_val -= scale * 0.025f;
+		y_offset_val -= scale * 0.025;
 
 	if (key == GLFW_KEY_EQUAL && (action == GLFW_REPEAT || action == GLFW_PRESS))
-		scale -= scale * 0.025f;
+		scale -= scale * 0.025;
 	if (key == GLFW_KEY_MINUS && (action == GLFW_REPEAT || action == GLFW_PRESS))
-		scale += scale * 0.025f;
+		scale += scale * 0.025;
 }
 
 void compileErrors(unsigned int shader, const char* type)
@@ -202,9 +204,11 @@ int main() {
 		glUniform1f(glGetUniformLocation(shaderProgram, "y_offset"), y_offset_val);
 		glUniform1f(glGetUniformLocation(shaderProgram, "iterations"), iterations);
 		glUniform1f(glGetUniformLocation(shaderProgram, "scale"), scale);
+		glUniform1f(glGetUniformLocation(shaderProgram, "color_multiply"), color_multiple);
 
 		ImGui::Begin("Settings");
 		ImGui::SliderInt("Iterations", &iterations, 10, 1000);
+		ImGui::SliderFloat("Color", &color_multiple, 0.0f, 3.0f);
 		ImGui::End();
 
 		ImGui::Begin("Controls");

@@ -3,10 +3,11 @@ out vec4 frag_color;
 
 in vec4 TexCoord;
 
-uniform float x_offset = 4.0;
-uniform float y_offset = 5.0;
-uniform float iterations = 200.0;
+uniform float x_offset = 0.0;
+uniform float y_offset = 0.0;
+uniform int iterations = 200;
 uniform float scale = 2.0;
+uniform float color_multiply = 1.0;
  
 void main()
 {
@@ -45,7 +46,7 @@ void main()
 
     if( new_sn>0.0 )
     {
-      col += 0.5+0.5*cos(0.2 * new_sn + vec3(2.7,3.2,3.7));
+      col += 0.5+0.5*cos(0.2 * new_sn + vec3(2.7 * color_multiply,3.2 * color_multiply,3.7 * color_multiply));
     }
 
     frag_color = vec4( col, 1.0 );
