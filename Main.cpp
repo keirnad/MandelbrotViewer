@@ -18,7 +18,7 @@ float x_offset_val = -0.5f;
 
 float y_offset_val = 0.0f;
 
-float scale = 2.0f;
+double scale = 2.000;
 
 int iterations = 250;
 
@@ -205,12 +205,12 @@ int main() {
 
 		glUniform1f(glGetUniformLocation(shaderProgram, "x_offset"), x_offset_val);
 		glUniform1f(glGetUniformLocation(shaderProgram, "y_offset"), y_offset_val);
-		glUniform1f(glGetUniformLocation(shaderProgram, "iterations"), iterations);
-		glUniform1f(glGetUniformLocation(shaderProgram, "scale"), scale);
+		glUniform1i(glGetUniformLocation(shaderProgram, "iterations"), iterations);
+		glUniform1d(glGetUniformLocation(shaderProgram, "scale"), scale);
 		glUniform1f(glGetUniformLocation(shaderProgram, "color_multiply"), color_multiple);
 
 		ImGui::Begin("Settings");
-		ImGui::SliderInt("Iterations", &iterations, 10, 1000);
+		ImGui::SliderInt("Iterations", &iterations, 10, 5000);
 		ImGui::SliderFloat("Color", &color_multiple, 0.0f, 3.0f);
 		ImGui::End();
 

@@ -5,8 +5,8 @@ in vec4 TexCoord;
 
 uniform float x_offset = 0.0;
 uniform float y_offset = 0.0;
-uniform int iterations = 200;
-uniform float scale = 2.0;
+uniform int iterations = 250;
+uniform double scale = 2.000;
 uniform float color_multiply = 1.0;
  
 void main()
