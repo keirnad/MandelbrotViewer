@@ -91,6 +91,9 @@ int main() {
 	// Use only modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	//Prevent resizing
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
 	GLfloat vertices[] =
 	{
 		-1.0, 1.0, 0.0,
