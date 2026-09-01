@@ -211,7 +211,7 @@ int main() {
 
 		ImGui::Begin("Settings");
 		ImGui::SliderInt("Iterations", &iterations, 10, 5000);
-		ImGui::SliderFloat("Color", &color_multiple, 0.0f, 3.0f);
+		ImGui::SliderFloat("Color", &color_multiple, 0.0f, 5.0f);
 		ImGui::End();
 
 		ImGui::Begin("Controls");
