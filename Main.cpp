@@ -1,12 +1,11 @@
-
-
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <cerrno>
+
+#include "shaderClass.h"
+#include "VAO.h"
+#include "VBO.h"
+#include "EBO.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -14,18 +13,23 @@
 
 GLuint x_offset, y_offset, mandelbrot_scale;
 
+// Vars for settings of mandelbrot set shader
 float x_offset_val = -0.5f;
 
 float y_offset_val = 0.0f;
 
-double scale = 2.000;
+float scale = 2.0f;
 
 int iterations = 250;
 
 float color_multiple = 1.0f;
 
+
+//Controls
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+
+	// Movement
 	if (key == GLFW_KEY_D && (action == GLFW_REPEAT || action == GLFW_PRESS))
 		x_offset_val += scale * 0.025;
 	if (key == GLFW_KEY_A && (action == GLFW_REPEAT || action == GLFW_PRESS))
@@ -35,49 +39,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_S && (action == GLFW_REPEAT || action == GLFW_PRESS))
 		y_offset_val -= scale * 0.025;
 
+	// Scaling
 	if (key == GLFW_KEY_EQUAL && (action == GLFW_REPEAT || action == GLFW_PRESS))
 		scale -= scale * 0.025;
 	if (key == GLFW_KEY_MINUS && (action == GLFW_REPEAT || action == GLFW_PRESS))
 		scale += scale * 0.025;
-}
-
-void compileErrors(unsigned int shader, const char* type)
-{
-	GLint hasCompiled;
-	char infolog[1024];
-	if (type != "PROGRAM")
-	{
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &hasCompiled);
-		if (hasCompiled == GL_FALSE) {
-			glGetShaderInfoLog(shader, 1024, NULL, infolog);
-			std::cout << "SHADER_COMPILATION_ERROR for:" << type << "\n" << std::endl;
-		}
-	}
-	else
-	{
-		glGetProgramiv(shader, GL_COMPILE_STATUS, &hasCompiled);
-		if (hasCompiled == GL_FALSE) {
-			glGetProgramInfoLog(shader, 1024, NULL, infolog);
-			std::cout << "SHADER_LINKING_ERROR for:" << type << "\n" << std::endl;
-		}
-	}
-}
-
-// Function for reading file contents (use it for shaders) https://insanecoding.blogspot.com/2011/11/how-to-read-in-file-in-c.html
-std::string get_file_contents(const char* filename)
-{
-	std::ifstream in(filename, std::ios::in | std::ios::binary);
-	if (in)
-	{
-		std::string contents;
-		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
-		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
-		in.close();
-		return(contents);
-	}
-	throw(errno);
 }
 
 int main() {
@@ -127,62 +93,23 @@ int main() {
 
 	glViewport(0, 0, 800, 800);
 
-	GLuint VBO, VAO, EBO;
+	// Connecting shaders
+	Shader shaderProrgam("mandelbrot.vert", "mandelbrot.frag");
 
-	// Get fragment and vertex shaders code 
-	std::string vertexCode = get_file_contents("mandelbrot.vert");
-	std::string fragmentCode = get_file_contents("mandelbrot.frag");
+	// Binding and creating VAO, EBO
+	VAO VAO1;
+	VAO1.Bind();
 
-	// Convert to C string
-	const char* vertexSource = vertexCode.c_str();
-	const char* fragmentSource = fragmentCode.c_str();
+	VBO VBO1(vertices, sizeof(vertices));
+	EBO EBO1(indices, sizeof(indices));
 
-	// Creating and compiling shaders
+	// Link buffer
+	VAO1.LinkVBO(VBO1, 0);
+	VAO1.Unbind();
+	VBO1.Unbind();
+	EBO1.Unbind();
 
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexSource, NULL);
-	glCompileShader(vertexShader);
-	compileErrors(vertexShader, "VERTEX");
-
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-	glCompileShader(fragmentShader);
-	compileErrors(vertexShader, "FRAGMENT");
-
-	GLuint shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-
-	glLinkProgram(shaderProgram);
-	compileErrors(vertexShader, "PROGRAM");
-
-	// Delete shaders because we dont need them anymore
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	// Gen buffers and vertex array
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
+	// Set up imgui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -197,23 +124,28 @@ int main() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// Handle controls
 		glfwSetKeyCallback(window, key_callback);
 
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
+		// Activating shader
+		shaderProrgam.Activate();
+		VAO1.Bind();
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-		glUniform1f(glGetUniformLocation(shaderProgram, "x_offset"), x_offset_val);
-		glUniform1f(glGetUniformLocation(shaderProgram, "y_offset"), y_offset_val);
-		glUniform1i(glGetUniformLocation(shaderProgram, "iterations"), iterations);
-		glUniform1d(glGetUniformLocation(shaderProgram, "scale"), scale);
-		glUniform1f(glGetUniformLocation(shaderProgram, "color_multiply"), color_multiple);
+		// Apply settings of shader mandelbrot set
+		glUniform1f(glGetUniformLocation(shaderProrgam.ID, "x_offset"), x_offset_val);
+		glUniform1f(glGetUniformLocation(shaderProrgam.ID, "y_offset"), y_offset_val);
+		glUniform1i(glGetUniformLocation(shaderProrgam.ID, "iterations"), iterations);
+		glUniform1f(glGetUniformLocation(shaderProrgam.ID, "scale"), scale);
+		glUniform1f(glGetUniformLocation(shaderProrgam.ID, "color_multiply"), color_multiple);
 
+		//Settings window
 		ImGui::Begin("Settings");
 		ImGui::SliderInt("Iterations", &iterations, 10, 5000);
 		ImGui::SliderFloat("Color", &color_multiple, 0.0f, 5.0f);
 		ImGui::End();
 
+		// Controls window
 		ImGui::Begin("Controls");
 		ImGui::Text("Movements:");
 		ImGui::Text("Move Up: W");
@@ -239,10 +171,10 @@ int main() {
 
 	// Delete VAO, EBO, VBO and shader program
 
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(shaderProgram);
+	VAO1.Delete();
+	VBO1.Delete();
+	EBO1.Delete();
+	shaderProrgam.Delete();
 	
 	glfwDestroyWindow(window);
 	glfwTerminate();
